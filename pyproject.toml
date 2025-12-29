@@ -19,6 +19,8 @@ numpy = "*"
 scikit-learn = "*"
 pillow = "*"
 # openfhe-python = "*"  # Not available on PyPI, install separately if needed
+cryptography = "^46.0.3"
+redis = "^7.1.0"
 
 [tool.poetry.scripts]
 app = "homomorphic_face_encryption.app:create_app"
@@ -28,6 +30,9 @@ black = "*"
 flake8 = "*"
 mypy = "*"
 pre-commit = "*"
+pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
+pytest-benchmark = "^5.2.3"
 
 [build-system]
 requires = ["poetry-core"]

@@ -122,6 +122,19 @@ def health():
         }), 500
 
 
+@api_bp.route('/debug/jwt-test', methods=['GET'])
+@jwt_required()
+def test_jwt():
+    """Debug endpoint to test JWT token validation."""
+    from flask import current_app
+    user_id = get_jwt_identity()
+    return jsonify({
+        "status": "JWT valid",
+        "user_id": user_id,
+        "jwt_secret_first_10": current_app.config.get("JWT_SECRET_KEY", "NOT SET")[:10]
+    }), 200
+
+
 # ============================================================================
 # Authentication Endpoint (Get JWT Token)
 # ============================================================================
@@ -164,6 +177,7 @@ def get_token():
         
         # Create access token with user_id as identity
         access_token = create_access_token(identity=str(user.id))
+        logger.info(f"Created JWT token for user {user.id}, token starts with: {access_token[:50]}...")
         
         return jsonify({
             "access_token": access_token,

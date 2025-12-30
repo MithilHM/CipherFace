@@ -1,14 +1,65 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import Button from './components/Button';
 import ConsentOnboarding from './ConsentOnboarding';
 import ConsentDashboard from './ConsentDashboard';
 
-// SVG Icons as components
-const ShieldIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
-const UserIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
-const GridIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>;
-const LockIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
-const SettingsIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m6.36 6.36l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m6.36-6.36l4.24-4.24" /></svg>;
+// SVG Icons as components with enhanced styling
+const ShieldIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" strokeOpacity="0.7" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const GridIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    <circle cx="12" cy="16" r="1" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
+const ScanIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+    <line x1="7" y1="12" x2="17" y2="12" />
+  </svg>
+);
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -25,20 +76,17 @@ const App = () => {
 
   useEffect(() => {
     if (token) {
-      // Fetch user info and check consent
       checkUserAndConsent();
     }
   }, [token]);
 
   const checkUserAndConsent = async () => {
     try {
-      // Get user info from token endpoint (or create a /api/me endpoint)
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
 
-        // Check if user has granted consent
         const consentCheck = await fetch(`/api/consent/verify/${userData.id}/AUTHENTICATION`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -77,7 +125,7 @@ const App = () => {
           id: data.user_id
         }));
         setUser({ username: data.username, id: data.user_id });
-        setNeedsConsent(true); // Show consent onboarding for new users
+        setNeedsConsent(true);
       }
     } catch (err) {
       alert('Login failed: ' + err.message);
@@ -122,7 +170,7 @@ const App = () => {
 
   const captureAndProcess = async () => {
     setStatus('processing');
-    setMessage('Capturing and encrypting...');
+    setMessage('Encrypting biometric data...');
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -158,7 +206,7 @@ const App = () => {
         if (activeTab === 'enroll') {
           setMessage(`✓ Identity Secured! Template ID: ${result.template_id}`);
         } else {
-          setMessage(`Confidence: ${(result.confidence * 100).toFixed(1)}%`);
+          setMessage(`✓ Match Confidence: ${(result.confidence * 100).toFixed(1)}%`);
         }
 
         setTimeout(() => {
@@ -174,53 +222,83 @@ const App = () => {
     }
   };
 
+  // Login Screen
   if (!token) {
     return (
       <div className="login-screen">
         <div className="login-card glass">
           <div className="logo"><ShieldIcon /> FHE.Face</div>
           <h3>Secure Gateway</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Privacy-Preserving Homomorphic Facial Recognition
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6 }}>
+            Privacy-Preserving Biometric Authentication<br />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Powered by Homomorphic Encryption</span>
           </p>
-          <form className="nav-links" onSubmit={handleLogin}>
+          <form className="nav-links" onSubmit={handleLogin} style={{ gap: '1.25rem' }}>
             <div className="form-group">
               <label>Identity Handle</label>
-              <input name="username" placeholder="e.g. Satoshi" required />
+              <input
+                name="username"
+                placeholder="Enter your username"
+                required
+                autoComplete="username"
+                autoFocus
+              />
             </div>
-            <button type="submit" className="btn btn-primary">Initialize Session</button>
+            <Button type="submit" size="lg" style={{ width: '100%' }}>
+              Initialize Secure Session
+            </Button>
           </form>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '0.5rem' }}>
+            🔐 128-bit FHE • CKKS Encryption • GDPR Compliant
+          </p>
         </div>
       </div>
     );
   }
 
-  // Show consent onboarding if needed
-  if (needsConsent) {
-    return <ConsentOnboarding userId={user?.id} onComplete={handleConsentComplete} />;
+  // Consent Onboarding
+  if (needsConsent && user?.id) {
+    return <ConsentOnboarding userId={user.id} onComplete={handleConsentComplete} />;
   }
 
+  // Main Dashboard
   return (
     <div className="app-container">
       <aside className="sidebar">
         <div className="logo"><ShieldIcon /> FHE.Face</div>
         <nav className="nav-links">
-          <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => { stopScanner(); setActiveTab('dashboard'); }}>
+          <div
+            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => { stopScanner(); setActiveTab('dashboard'); }}
+          >
             <GridIcon /> Dashboard
           </div>
-          <div className={`nav-item ${activeTab === 'enroll' ? 'active' : ''}`} onClick={() => { stopScanner(); setActiveTab('enroll'); }}>
+          <div
+            className={`nav-item ${activeTab === 'enroll' ? 'active' : ''}`}
+            onClick={() => { stopScanner(); setActiveTab('enroll'); }}
+          >
             <UserIcon /> Enroll Identity
           </div>
-          <div className={`nav-item ${activeTab === 'verify' ? 'active' : ''}`} onClick={() => { stopScanner(); setActiveTab('verify'); }}>
+          <div
+            className={`nav-item ${activeTab === 'verify' ? 'active' : ''}`}
+            onClick={() => { stopScanner(); setActiveTab('verify'); }}
+          >
             <LockIcon /> Secure Auth
           </div>
-          <div className={`nav-item ${activeTab === 'privacy' ? 'active' : ''}`} onClick={() => { stopScanner(); setActiveTab('privacy'); }}>
+          <div
+            className={`nav-item ${activeTab === 'privacy' ? 'active' : ''}`}
+            onClick={() => { stopScanner(); setActiveTab('privacy'); }}
+          >
             <SettingsIcon /> Privacy Center
           </div>
         </nav>
         <div style={{ marginTop: 'auto' }}>
-          <div className="nav-item" onClick={() => { localStorage.clear(); window.location.reload(); }}>
-            Logout
+          <div
+            className="nav-item"
+            onClick={() => { localStorage.clear(); window.location.reload(); }}
+            style={{ color: 'var(--text-dim)' }}
+          >
+            <LogoutIcon /> Sign Out
           </div>
         </div>
       </aside>
@@ -229,60 +307,177 @@ const App = () => {
         <header className="dashboard-header">
           <div>
             <h1>Shield Portal</h1>
-            <p style={{ color: 'var(--text-muted)' }}>Welcome back, <span className="mono">{user?.username}</span></p>
+            <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+              Welcome back, <span className="mono" style={{ color: 'var(--primary-light)' }}>{user?.username}</span>
+            </p>
           </div>
           <div className="status-badge status-secure">
             {hasConsent ? 'FHE Active' : 'Consent Required'}
           </div>
         </header>
 
+        {/* Dashboard View */}
         {activeTab === 'dashboard' && (
           <div className="portal-view">
             <div className="stats-grid">
               <div className="stat-card glass">
-                <div className="stat-header">Identity Protection <span>FHE-CKKS</span></div>
+                <div className="stat-header">
+                  Identity Protection
+                  <span>FHE-CKKS</span>
+                </div>
                 <div className="stat-value">128-bit</div>
                 <div className="stat-footer">Quantum Resistant Standard</div>
               </div>
               <div className="stat-card glass">
-                <div className="stat-header">Consent Status <span>DPDP Standard</span></div>
+                <div className="stat-header">
+                  Consent Status
+                  <span>DPDP</span>
+                </div>
                 <div className="stat-value">{hasConsent ? 'Active' : 'Pending'}</div>
                 <div className="stat-footer">{hasConsent ? 'All requirements met' : 'Consent required'}</div>
               </div>
               <div className="stat-card glass">
-                <div className="stat-header">Polynomial Degree <span>CKKS</span></div>
+                <div className="stat-header">
+                  Polynomial Degree
+                  <span>CKKS</span>
+                </div>
                 <div className="stat-value">8192</div>
                 <div className="stat-footer">Ring Dimension</div>
               </div>
             </div>
 
             <div className="glass" style={{ width: '100%', padding: '2rem' }}>
-              <h3>Quick Actions</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
-                <button className="btn btn-primary" onClick={() => setActiveTab('enroll')}>
+              <h3 style={{ marginBottom: '0.5rem' }}>Quick Actions</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+                Manage your biometric identity with military-grade encryption
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <Button onClick={() => setActiveTab('enroll')}>
                   👤 Enroll New Template
-                </button>
-                <button className="btn btn-ghost" onClick={() => setActiveTab('verify')}>
+                </Button>
+                <Button variant="ghost" onClick={() => setActiveTab('verify')}>
                   🔓 Authenticate
-                </button>
-                <button className="btn btn-ghost" onClick={() => setActiveTab('privacy')}>
+                </Button>
+                <Button variant="ghost" onClick={() => setActiveTab('privacy')}>
                   ⚙️ Privacy Settings
-                </button>
+                </Button>
+              </div>
+            </div>
+
+            {/* Security Features */}
+            <div className="glass" style={{ width: '100%', padding: '2rem' }}>
+              <h3 style={{ marginBottom: '1.5rem' }}>Security Features</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    🔐
+                  </div>
+                  <div>
+                    <h4 style={{ marginBottom: '0.25rem' }}>Homomorphic Encryption</h4>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      Computations on encrypted data without decryption
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, rgba(6, 214, 160, 0.2) 0%, rgba(6, 214, 160, 0.1) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    🛡️
+                  </div>
+                  <div>
+                    <h4 style={{ marginBottom: '0.25rem' }}>Zero-Knowledge Matching</h4>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      Your face is never seen during authentication
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, rgba(244, 114, 182, 0.2) 0%, rgba(244, 114, 182, 0.1) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    📋
+                  </div>
+                  <div>
+                    <h4 style={{ marginBottom: '0.25rem' }}>GDPR & DPDP Compliant</h4>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      Full consent management and data portability
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         )}
 
+        {/* Enroll / Verify Views */}
         {(activeTab === 'enroll' || activeTab === 'verify') && (
           <div className="portal-view">
-            <h2>{activeTab === 'enroll' ? 'Biometric Enrollment' : 'Identity Verification'}</h2>
-            <p style={{ color: 'var(--text-muted)' }}>
-              Computations are performed on encrypted data. Your actual face image is never stored.
-            </p>
+            <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+              <h2>{activeTab === 'enroll' ? '🆔 Biometric Enrollment' : '🔐 Identity Verification'}</h2>
+              <p style={{ color: 'var(--text-muted)', marginTop: '0.75rem', lineHeight: 1.6 }}>
+                {activeTab === 'enroll'
+                  ? 'Create a secure encrypted template of your biometric identity'
+                  : 'Authenticate using your encrypted biometric profile'
+                }
+              </p>
+            </div>
 
             {!isScanning ? (
-              <div className="glass" style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>
-                <button className="btn btn-primary" onClick={startScanner}>Activate Bio-Scanner</button>
+              <div className="glass" style={{
+                padding: '4rem 3rem',
+                textAlign: 'center',
+                width: '100%',
+                maxWidth: '600px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem'
+              }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(6, 214, 160, 0.1) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '0.5rem'
+                }}>
+                  <ScanIcon />
+                </div>
+                <div>
+                  <h3 style={{ marginBottom: '0.5rem' }}>Ready to Scan</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    Position your face in the frame for secure capture
+                  </p>
+                </div>
+                <Button onClick={startScanner} size="lg">
+                  Activate Bio-Scanner
+                </Button>
               </div>
             ) : (
               <>
@@ -292,31 +487,73 @@ const App = () => {
                     <div className="scan-line" />
                     <div className="face-portal" />
                   </div>
+                  {/* Bottom corner markers */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '20px',
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid var(--accent)',
+                    borderTop: 'none',
+                    borderRight: 'none',
+                    borderRadius: '4px'
+                  }} />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '20px',
+                    right: '20px',
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid var(--accent)',
+                    borderTop: 'none',
+                    borderLeft: 'none',
+                    borderRadius: '4px'
+                  }} />
                 </div>
 
-                <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                <div style={{ marginTop: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                   {status === 'capturing' && (
-                    <>
-                      <button className="btn btn-primary" onClick={captureAndProcess} style={{ marginRight: '1rem' }}>
-                        Capture & Encrypt
-                      </button>
-                      <button className="btn btn-ghost" onClick={stopScanner}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <Button onClick={captureAndProcess}>
+                        ⚡ Capture & Encrypt
+                      </Button>
+                      <Button variant="ghost" onClick={stopScanner}>
                         Cancel
-                      </button>
-                    </>
-                  )}
-                  {status === 'processing' && (
-                    <div className="btn btn-ghost" style={{ cursor: 'wait' }}>
-                      <div className="mono">{message}</div>
+                      </Button>
                     </div>
                   )}
+                  {status === 'processing' && (
+                    <Button variant="glass" loading disabled style={{ minWidth: '200px' }}>
+                      <span className="mono">{message}</span>
+                    </Button>
+                  )}
                   {status === 'success' && (
-                    <div style={{ color: 'var(--accent)', fontWeight: 600, fontSize: '1.1rem' }}>{message}</div>
+                    <div style={{
+                      color: 'var(--accent)',
+                      fontWeight: 600,
+                      fontSize: '1.125rem',
+                      padding: '1rem 2rem',
+                      background: 'rgba(6, 214, 160, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(6, 214, 160, 0.2)'
+                    }}>
+                      {message}
+                    </div>
                   )}
                   {status === 'error' && (
-                    <div>
-                      <div style={{ color: 'var(--error)', fontWeight: 600, marginBottom: '1rem' }}>{message}</div>
-                      <button className="btn btn-ghost" onClick={stopScanner}>Close</button>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{
+                        color: 'var(--error)',
+                        fontWeight: 600,
+                        padding: '1rem 2rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(239, 68, 68, 0.2)'
+                      }}>
+                        {message}
+                      </div>
+                      <Button variant="ghost" onClick={stopScanner}>Close Scanner</Button>
                     </div>
                   )}
                 </div>
@@ -326,6 +563,7 @@ const App = () => {
           </div>
         )}
 
+        {/* Privacy Center */}
         {activeTab === 'privacy' && (
           <ConsentDashboard userId={user?.id} token={token} />
         )}

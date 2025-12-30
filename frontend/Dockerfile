@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+# Ensure devDependencies (e.g., tailwindcss) are installed for dev server
+RUN npm install --include=dev
 
 COPY . .
 

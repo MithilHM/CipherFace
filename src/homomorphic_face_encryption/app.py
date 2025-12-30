@@ -71,8 +71,17 @@ def create_app(config_override: dict = None) -> Flask:
 
     # Base configuration
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET", "jwt-secret-key")
+    
+    # JWT Configuration - explicit settings for consistency
+    jwt_secret = os.getenv("JWT_SECRET", "jwt-secret-key-for-development-only")
+    app.config["JWT_SECRET_KEY"] = jwt_secret
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
+    app.config["JWT_ALGORITHM"] = "HS256"  # Explicitly use HS256
+    app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+    app.config["JWT_HEADER_NAME"] = "Authorization"
+    app.config["JWT_HEADER_TYPE"] = "Bearer"
+    
+    logger.info(f"JWT configured with secret starting with: {jwt_secret[:15]}...")
 
     # Database configuration
     app.config["SQLALCHEMY_DATABASE_URI"] = (
@@ -101,6 +110,37 @@ def create_app(config_override: dict = None) -> Flask:
     jwt = JWTManager(app)
     logger.info("JWT Manager initialized")
 
+    # JWT Error Handlers - Return proper JSON responses
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            "error": "Token has expired",
+            "message": "Please log in again"
+        }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error_string):
+        logger.error(f"JWT INVALID TOKEN ERROR: {error_string}")
+        logger.error(f"JWT_SECRET_KEY configured: {app.config.get('JWT_SECRET_KEY', 'NOT SET')[:10]}...")
+        return jsonify({
+            "error": "Invalid token",
+            "message": f"Token validation failed: {error_string}"
+        }), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error_string):
+        return jsonify({
+            "error": "Authorization required",
+            "message": "No valid token provided"
+        }), 401
+
+    @jwt.token_verification_failed_loader
+    def token_verification_failed_callback(jwt_header, jwt_payload):
+        return jsonify({
+            "error": "Token verification failed",
+            "message": "The token could not be verified"
+        }), 401
+
     # Redis Client
     redis_client = None
     try:
@@ -119,20 +159,34 @@ def create_app(config_override: dict = None) -> Flask:
     # Initialize consent middleware
     init_consent_middleware(app, redis_client)
 
-    # Initialize security middleware (must be after consent middleware)
-    security_config = SecurityConfig(
-        jwt_secret_key=os.getenv("JWT_SECRET_KEY", "dev-secret-key"),
-        jwt_public_key=os.getenv("JWT_PUBLIC_KEY", ""),
-        redis_url=redis_url,
-        cors_origins=os.getenv("CORS_ORIGINS", "https://app.example.com").split(","),
-        log_level=os.getenv("LOG_LEVEL", "INFO"),
-        enable_2fa=os.getenv("ENABLE_2FA", "false").lower() == "true",
-        enable_request_logging=os.getenv("ENABLE_REQUEST_LOGGING", "true").lower()
-        == "true",
-        enable_rate_limiting=os.getenv("ENABLE_RATE_LIMITING", "true").lower()
-        == "true",
-    )
-    init_security_middleware(app)
+    # =========================================================================
+    # CORS Setup (simple version for development)
+    # =========================================================================
+    from flask_cors import CORS
+    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+    CORS(app, origins=cors_origins, supports_credentials=True)
+    logger.info(f"CORS enabled for origins: {cors_origins}")
+
+    # Initialize security middleware only in production
+    # In development, it can interfere with flask_jwt_extended
+    is_development = app.debug or os.getenv("FLASK_ENV") == "development"
+    if not is_development:
+        security_config = SecurityConfig(
+            jwt_secret_key=os.getenv("JWT_SECRET_KEY", "dev-secret-key"),
+            jwt_public_key=os.getenv("JWT_PUBLIC_KEY", ""),
+            redis_url=redis_url,
+            cors_origins=cors_origins,
+            log_level=os.getenv("LOG_LEVEL", "INFO"),
+            enable_2fa=os.getenv("ENABLE_2FA", "false").lower() == "true",
+            enable_request_logging=os.getenv("ENABLE_REQUEST_LOGGING", "true").lower()
+            == "true",
+            enable_rate_limiting=os.getenv("ENABLE_RATE_LIMITING", "true").lower()
+            == "true",
+        )
+        init_security_middleware(app)
+        logger.info("Security middleware initialized (production mode)")
+    else:
+        logger.info("Security middleware DISABLED (development mode)")
 
     # =========================================================================
     # Register Blueprints

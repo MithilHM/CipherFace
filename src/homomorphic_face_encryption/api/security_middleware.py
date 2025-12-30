@@ -424,17 +424,22 @@ class SecurityMiddleware:
 
     def _setup_security_headers(self):
         """Setup Flask-Talisman for security headers."""
+        # Check if in development mode
+        is_development = self.app.debug or os.getenv("FLASK_ENV") == "development"
+        
         csp = {
             "default-src": "'self'",
-            "img-src": ["'self'", "data:"],
-            "script-src": "'self'",
+            "img-src": ["'self'", "data:", "blob:"],
+            "script-src": ["'self'", "'unsafe-inline'" if is_development else "'self'"],
+            "style-src": ["'self'", "'unsafe-inline'"],
+            "connect-src": ["'self'", "http://localhost:*", "http://127.0.0.1:*"] if is_development else "'self'",
         }
 
         Talisman(
             self.app,
             content_security_policy=csp,
             force_https=False,  # Set to True in production with HTTPS
-            strict_transport_security=True,
+            strict_transport_security=not is_development,  # Disable HSTS in development
             strict_transport_security_max_age=31536000,
             strict_transport_security_include_subdomains=True,
             frame_options="DENY",
@@ -445,8 +450,9 @@ class SecurityMiddleware:
         CORS(
             self.app,
             origins=self.config.cors_origins,
-            methods=["POST", "GET", "OPTIONS"],
-            allowed_headers=["Authorization", "Content-Type"],
+            methods=["POST", "GET", "OPTIONS", "DELETE", "PUT"],
+            allowed_headers=["Authorization", "Content-Type", "Accept"],
+            supports_credentials=True,
             max_age=3600,
         )
 

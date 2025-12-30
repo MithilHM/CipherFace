@@ -95,6 +95,12 @@ def create_app(config_override: dict = None) -> Flask:
     if config_override:
         app.config.update(config_override)
 
+    # =========================================================================
+    # Initialize JWT Manager
+    # =========================================================================
+    jwt = JWTManager(app)
+    logger.info("JWT Manager initialized")
+
     # Redis Client
     redis_client = None
     try:

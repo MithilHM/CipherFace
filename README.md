@@ -31,21 +31,34 @@ src/homomorphic_face_encryption/
 
 ## Quick Setup with Docker (Recommended)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd homomorphic-face-encryption
-   ```
+### One-Command Startup
 
-2. **Build and run with Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
+**Windows (PowerShell):**
+```powershell
+.\start.ps1
+```
 
-3. **Access the application**
-   - API will be available at: `http://localhost:5000`
-   - PostgreSQL will be available on port: `5432`
-   - Redis will be available on port: `6379`
+**macOS / Linux:**
+```bash
+chmod +x start.sh && ./start.sh
+```
+
+These scripts handle everything: checking Docker, building images, starting services, and opening your browser.
+
+### Manual Docker Compose
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd homomorphic-face-encryption
+
+# Build and run
+docker compose up --build -d
+
+# Access the application
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:5000
+```
 
 ## Manual Setup (Alternative)
 

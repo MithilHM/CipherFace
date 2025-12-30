@@ -26,6 +26,7 @@ import hashlib
 import logging
 import base64
 import json
+from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from functools import wraps
 from datetime import datetime, timedelta
@@ -387,8 +388,9 @@ class SecurityMiddleware:
     def _load_private_key(self) -> str:
         """Load JWT private key."""
         # In production, load from secure key management system
-        if os.path.exists("keys/jwt_private.pem"):
-            with open("keys/jwt_private.pem", "r") as f:
+        key_path = Path("keys") / "jwt_private.pem"
+        if key_path.exists():
+            with open(key_path, "r") as f:
                 return f.read()
         else:
             # Generate temporary key pair for development
@@ -404,8 +406,9 @@ class SecurityMiddleware:
 
     def _load_public_key(self) -> str:
         """Load JWT public key."""
-        if os.path.exists("keys/jwt_public.pem"):
-            with open("keys/jwt_public.pem", "r") as f:
+        key_path = Path("keys") / "jwt_public.pem"
+        if key_path.exists():
+            with open(key_path, "r") as f:
                 return f.read()
         else:
             # Generate from private key
@@ -435,7 +438,6 @@ class SecurityMiddleware:
             strict_transport_security_max_age=31536000,
             strict_transport_security_include_subdomains=True,
             frame_options="DENY",
-            content_type_options="nosniff",
         )
 
     def _setup_cors(self):

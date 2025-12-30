@@ -265,3 +265,15 @@ class CKKSEncryptor:
         status = "initialized" if self.context else "not_initialized"
         device = "CPU"
         return f"CKKSEncryptor(status={status}, device={device}, embedding_dim=512)"
+
+
+# Global singleton instance
+_ckks_encryptor = None
+
+
+def get_ckks_encryptor() -> CKKSEncryptor:
+    """Get global CKKSEncryptor instance."""
+    global _ckks_encryptor
+    if _ckks_encryptor is None:
+        _ckks_encryptor = CKKSEncryptor()
+    return _ckks_encryptor

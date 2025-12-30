@@ -15,6 +15,9 @@ import logging
 import os
 from typing import Tuple, Optional, List, Union
 import numpy as np
+import cv2
+import torch
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -215,10 +218,9 @@ class FaceService:
         Returns:
             Normalized embedding vector (512,)
         """
-        import torch
-        
         # Convert to tensor: [H, W, C] -> [C, H, W]
-        face_tensor = torch.tensor(face_image, dtype=torch.float32)
+        # Use from_numpy for efficiency
+        face_tensor = torch.from_numpy(face_image).float()
         face_tensor = face_tensor.permute(2, 0, 1)  # HWC -> CHW
         
         # Normalize to [0, 1]
@@ -228,6 +230,16 @@ class FaceService:
         embedding = self.extractor.extract_embedding(face_tensor)
         
         return embedding
+
+    def warmup(self):
+        """Run a dummy inference to warm up the models."""
+        try:
+            logger.info("Warming up biometric models...")
+            dummy_image = np.zeros((160, 160, 3), dtype=np.uint8)
+            self.extract_embedding(dummy_image)
+            logger.info("Biometric models warmed up successfully")
+        except Exception as e:
+            logger.warning(f"Biometric warm-up failed: {e}")
     
     def process_image(self, base64_image: str) -> Tuple[bool, Union[np.ndarray, str]]:
         """

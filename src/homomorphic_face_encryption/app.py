@@ -223,6 +223,26 @@ def create_app(config_override: dict = None) -> Flask:
         except Exception as e:
             logger.error(f"Database setup failed: {e}")
 
+        # Pre-initialize biometric and cryptographic services
+        try:
+            from .biometric.face_service import get_face_service
+            from .crypto.ckks_encryptor import get_ckks_encryptor
+            
+            logger.info("Pre-initializing biometric and cryptographic services...")
+            
+            # Initialize FaceService
+            face_service = get_face_service()
+            face_service.warmup()
+            
+            # Initialize CKKSEncryptor
+            encryptor = get_ckks_encryptor()
+            encryptor.setup_context()
+            encryptor.generate_keys()
+            
+            logger.info("Services pre-initialized successfully")
+        except Exception as e:
+            logger.warning(f"Core services pre-initialization failed: {e}")
+
     # =========================================================================
     # Error Handlers (now handled by security middleware)
     # =========================================================================

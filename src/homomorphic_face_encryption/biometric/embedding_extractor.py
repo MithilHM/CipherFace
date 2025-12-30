@@ -1,5 +1,6 @@
 """Face Embedding Extraction using FaceNet"""
 
+import os
 import torch
 import numpy as np
 from typing import List, Union, Tuple
@@ -13,7 +14,12 @@ class EmbeddingExtractor:
         """Initialize the FaceNet model for embedding extraction."""
         # Determine device - Forced to CPU
         self.device = torch.device('cpu')
-        print(f"Using device: {self.device}")
+        
+        # Optimize CPU threads for inference
+        if torch.get_num_threads() < 4:
+            torch.set_num_threads(max(4, os.cpu_count() or 4))
+            
+        print(f"Using device: {self.device} (threads: {torch.get_num_threads()})")
 
         # Load pre-trained FaceNet model
         try:
@@ -27,7 +33,7 @@ class EmbeddingExtractor:
         self.model.eval()
 
         # Disable gradients for inference
-        self.no_grad_context = torch.no_grad()
+        self.no_grad_context = torch.inference_mode()
 
         print(f"EmbeddingExtractor initialized on {self.device}")
 
@@ -65,7 +71,7 @@ class EmbeddingExtractor:
         face_batch = face_tensor.unsqueeze(0)
 
         # Extract embedding
-        with self.no_grad_context:
+        with torch.inference_mode():
             embedding = self.model(face_batch)  # Shape: [1, 512]
 
         # Remove batch dimension: [1, 512] -> [512]
@@ -122,7 +128,7 @@ class EmbeddingExtractor:
             raise ValueError(f"Could not stack tensors into batch: {e}")
 
         # Extract embeddings
-        with self.no_grad_context:
+        with torch.inference_mode():
             embeddings = self.model(batch_tensor)  # Shape: [N, 512]
 
         # L2 normalization for each embedding in batch

@@ -35,7 +35,7 @@ from ..database import (
     encrypt_json_metadata,
     generate_encryption_params_hash,
 )
-from ..crypto.ckks_encryptor import CKKSEncryptor
+from ..crypto.ckks_encryptor import get_ckks_encryptor
 from ..crypto.ckks_multikey_encryptor import MultiKeyCKKSEncryptor
 from ..consent.consent_service import ConsentService
 
@@ -405,11 +405,13 @@ def authenticate():
                 400,
             )
 
-        # Initialize CKKS encryptor
+        # Get global CKKS encryptor
         try:
-            encryptor = CKKSEncryptor()
-            encryptor.setup_context()
-            encryptor.generate_keys()
+            encryptor = get_ckks_encryptor()
+            if not encryptor.context:
+                encryptor.setup_context()
+            if not encryptor.key_pair:
+                encryptor.generate_keys()
         except Exception as e:
             logger.error(f"Failed to initialize CKKS encryptor: {e}")
             create_audit_log(

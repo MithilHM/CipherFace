@@ -25,6 +25,10 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.types import LargeBinary, TypeDecorator
 
 
+# Global cache for derived keys to avoid repeated heavy PBKDF2 iterations
+_key_cache = {}
+
+
 def get_encryption_key() -> str:
     """
     Retrieve the database encryption key from environment.
@@ -95,11 +99,12 @@ def encrypt_column_data(plaintext: str | bytes, key: str | None = None) -> bytes
     
     # We'll use Python-side encryption for portability
     # In production with direct DB access, use pgp_sym_encrypt SQL function
-    import base64
-    from hashlib import sha256
     
-    # Simple AES-like encryption using pgcrypto-compatible format
-    # For production, consider using cryptography library with Fernet
+    # Check cache for derived key
+    if key in _key_cache:
+        f = _key_cache[key]
+        return f.encrypt(plaintext)
+
     try:
         from cryptography.fernet import Fernet
         from cryptography.hazmat.primitives import hashes
@@ -115,6 +120,10 @@ def encrypt_column_data(plaintext: str | bytes, key: str | None = None) -> bytes
         )
         derived_key = base64.urlsafe_b64encode(kdf.derive(key.encode()))
         f = Fernet(derived_key)
+        
+        # Cache for subsequent calls
+        _key_cache[key] = f
+        
         return f.encrypt(plaintext)
     except ImportError:
         # Fallback: base64 encoding (NOT SECURE - only for development)
@@ -143,6 +152,15 @@ def decrypt_column_data(ciphertext: bytes, key: str | None = None) -> str:
     if key is None:
         key = get_encryption_key()
     
+    # Check cache for derived key
+    if key in _key_cache:
+        f = _key_cache[key]
+        try:
+            decrypted = f.decrypt(ciphertext)
+            return decrypted.decode("utf-8")
+        except Exception as e:
+            raise ValueError(f"Decryption failed: {e}")
+
     try:
         from cryptography.fernet import Fernet, InvalidToken
         from cryptography.hazmat.primitives import hashes
@@ -157,6 +175,9 @@ def decrypt_column_data(ciphertext: bytes, key: str | None = None) -> str:
         )
         derived_key = base64.urlsafe_b64encode(kdf.derive(key.encode()))
         f = Fernet(derived_key)
+        
+        # Cache for subsequent calls
+        _key_cache[key] = f
         
         try:
             decrypted = f.decrypt(ciphertext)

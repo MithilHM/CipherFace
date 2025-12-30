@@ -17,17 +17,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /build
 
-# Copy requirements
-COPY requirements.txt .
+# Copy requirements and constraints
+COPY requirements.txt constraints.txt ./
 
-# Install dependencies in one layer to reduce image size
-# We use --index-url to ensure CPU-only versions are pulled for torch
+# Configure PIP constraints file location
+ENV PIP_CONSTRAINT=/build/constraints.txt
+
+# Install dependencies in a single, clean layer with Triple-Lock Optimization:
+# 1. Explicit --index-url for CPU-only wheels
+# 2. Explicit --constraint to lock versions
+# 3. Explicit purge of any nvidia/cuda artifacts that might be pulled transitively
 RUN pip install --no-cache-dir --user \
   --index-url https://download.pytorch.org/whl/cpu \
   torch==2.1.0+cpu \
   torchvision==0.16.0+cpu \
-  && pip install --no-cache-dir --user -r requirements.txt \
-  && pip install --no-cache-dir --user facenet-pytorch
+  facenet-pytorch \
+  -r requirements.txt \
+  && pip uninstall -y nvidia-cublas-cu11 nvidia-cublas-cu12 nvidia-cuda-cupti-cu11 nvidia-cuda-cupti-cu12 \
+     nvidia-cuda-nvrtc-cu11 nvidia-cuda-nvrtc-cu12 nvidia-cuda-runtime-cu11 nvidia-cuda-runtime-cu12 \
+     nvidia-cudnn-cu11 nvidia-cudnn-cu12 nvidia-cufft-cu11 nvidia-cufft-cu12 \
+     nvidia-curand-cu11 nvidia-curand-cu12 nvidia-cusolver-cu11 nvidia-cusolver-cu12 \
+     nvidia-cusparse-cu11 nvidia-cusparse-cu12 nvidia-nccl-cu11 nvidia-nccl-cu12 \
+     nvidia-nvtx-cu11 nvidia-nvtx-cu12 \
+  && find /root/.local -name "__pycache__" -type d -exec rm -rf {} + \
+  && find /root/.local -name "*.pyc" -delete
 
 # -----------------------------------------------------------------------------
 # Stage 2: Production image

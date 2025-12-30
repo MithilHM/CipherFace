@@ -65,6 +65,9 @@ graph TD
     Consent --> DB
     API --> Redis[(Redis)]
 ```
+ 
+![System Architecture Diagram](path/to/system_architecture.png)
+*High-level overview of the Homomorphic Face Encryption system components and their interactions.*
 
 ### 4.2 Authentication Flow (1:N Mode)
 The following diagram illustrates how a user is identified from a database without the server ever seeing their raw facial data.
@@ -95,6 +98,18 @@ sequenceDiagram
     
     A-->>U: Authentication Success/Failure (JWT)
 ```
+
+### 4.3 Database Schema
+The system uses a PostgreSQL database with pgcrypto for column-level encryption of sensitive non-biometric data.
+
+**Key Entities:**
+- **Users**: Core user profiles with soft-delete support and consent tracking.
+- **Biometric Templates**: Encrypted face embeddings (CKKS ciphertexts).
+- **Consent Records**: Purview-specific consent logs (DPDP compliant).
+- **Audit Logs**: Immutable trail of all sensitive operations.
+
+![Database Entity Relationship Diagram](path/to/database_schema.png)
+*Detailed schema showing relationships between users, templates, consent, and audit logs.*
 
 ---
 
@@ -161,28 +176,28 @@ We assume an "Honest-but-Curious" server model. The server follows the protocol 
 
 ## 9. Screenshots & Visual Aids
 
-### 6.1 Performance Benchmarks
+### 9.1 Performance Benchmarks
 The system has been rigorously tested for accuracy and latency.
 
 **Accuracy vs. Encryption (ROC Curve):**
 *The ROC curve demonstrates that homomorphic encryption maintains the same accuracy levels as plaintext processing, with negligible noise introduction.*
-![Accuracy Plot](file:///c:/Users/Kartik/Desktop/1st%20project/faceprivacy/Homomorphic-face-encyption/accuracy_vs_encryption_roc.png)
+![Accuracy Plot]()
 
 **Scaling (Wait-time vs. Database Size):**
 *Our benchmarks show linear scaling, with 1:N search remaining efficient even as the enrolled user base grows.*
-![Scaling Plot](file:///c:/Users/Kartik/Desktop/1st%20project/faceprivacy/Homomorphic-face-encyption/benchmark_1_to_N_scaling.png)
+![Scaling Plot]()
 
 ### 10. Challenges & Learnings
 
-### 7.1 Computational Complexity
+### 10.1 Computational Complexity
 **Challenge**: FHE operations are orders of magnitude slower than plaintext operations. 
 **Solution**: We implemented the CKKS scheme which allows for SIMD (Single Instruction Multiple Data) operations, enabling us to process entire vectors in a single ciphertext.
 
-### 7.2 Key Management Lifecycle
+### 10.2 Key Management Lifecycle
 **Challenge**: Managing keys for thousands of users securely.
 **Solution**: Developed a multi-key switching protocol that allows users to keep their private keys while the server performs computations using its own key switch material.
 
-### 7.3 Library Dependencies
+### 10.3 Library Dependencies
 **Challenge**: Integrating the C++ OpenFHE library with a Python-based Flask environment.
 **Solution**: Utilized Docker multi-stage builds to compile the library and its Python bindings in a clean environment, ensuring stability across deployments.
 
